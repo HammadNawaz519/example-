@@ -1,0 +1,14 @@
+[tool.pyrefly]
+# Ignore virtual in-memory analysis errors — Pyrefly analyzes method bodies
+# out of class/function context, producing false parse errors.
+ignore_missing_imports = true
+check_untyped_defs = false
+
+[[tool.pyrefly.per_file_ignore_errors]]
+path = "D:/__pyrefly_virtual__/**"
+codes = ["parse-error", "invalid-syntax", "unknown-name"]
+
+[tool.pyright]
+reportMissingImports = "none"
+reportMissingModuleSource = "none"
+reportMissingTypeStubs = "none"

@@ -1,0 +1,4 @@
+{
+  "pyrefly.enable": false,
+  "python.analysis.typeCheckingMode": "off"
+}

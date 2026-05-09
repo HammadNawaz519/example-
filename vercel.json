@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "public": false,
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "framework": "vite",
+  "env": {
+    "REDIS_URL": "@redis_url",
+    "PORT": "@port",
+    "NODE_ENV": "production"
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "backend/server.js"
+    },
+    {
+      "src": "/socket.io/(.*)",
+      "dest": "backend/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "frontend/dist/$1"
+    },
+    {
+      "src": "/",
+      "dest": "frontend/dist/index.html"
+    }
+  ],
+  "functions": {
+    "backend/server.js": {
+      "runtime": "nodejs20.x",
+      "memory": 1024,
+      "maxDuration": 60,
+      "environment": [
+        "REDIS_URL",
+        "PORT",
+        "NODE_ENV"
+      ]
+    }
+  }
+}
