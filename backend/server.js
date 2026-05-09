@@ -144,13 +144,15 @@ const N8N_DISTRESS_URL = 'https://beaniegame.app.n8n.cloud/webhook/distress-call
 const N8N_GEOFENCE_URL = 'https://beaniegame.app.n8n.cloud/webhook/geofence-alert';
 
 // ── App setup ─────────────────────────────────────────────────────────────────
+const FRONTEND_URL = process.env.FRONTEND_URL || '*';
+
 const app = express();
-app.use(cors());
+app.use(cors({ origin: FRONTEND_URL }));
 app.use(express.json());
 
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: '*', methods: ['GET', 'POST', 'DELETE'] },
+  cors: { origin: FRONTEND_URL, methods: ['GET', 'POST', 'DELETE'] },
   transports: ['websocket', 'polling'],
 });
 
