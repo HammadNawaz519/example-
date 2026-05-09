@@ -5,7 +5,7 @@ const turf = require('@turf/turf');
 const { haversine, bearing, AStarRouter } = require('./router');
 
 const path = require('path');
-const FLEET_JSON = process.env.FLEET_JSON || path.join(__dirname, '..', 'fleet.json');
+const FLEET_JSON = process.env.FLEET_JSON || path.join(__dirname, 'fleet.json');
 
 const HISTORY_INTERVAL = 30;  // seconds
 const MAX_HISTORY = 120;

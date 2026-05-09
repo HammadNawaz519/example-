@@ -18,7 +18,7 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: .
     restart: always
     ports:
       - "8000:8000"
@@ -29,21 +29,12 @@ services:
       - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY:-}
       - NODE_ENV=production
     volumes:
-      - ./fleet.json:/app/../fleet.json:ro
+      - ./fleet.json:/app/fleet.json:ro
     depends_on:
       redis:
         condition: service_healthy
 
-  frontend:
-    build:
-      context: ./frontend
-      args:
-        - VITE_MAPBOX_TOKEN=${VITE_MAPBOX_TOKEN:-}
-    restart: always
-    ports:
-      - "3000:3000"
-    depends_on:
-      - backend
+
 
 volumes:
   redis-data:
