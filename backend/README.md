@@ -9,7 +9,7 @@ Real-time maritime command system. 15 ships. 1 Hz updates. AI distress NLP. Weat
 | Backend | Node.js 20, Express, Socket.IO, ioredis, @turf/turf |
 | Frontend | React 18, Vite, Mapbox GL JS, Mapbox GL Draw, Zustand |
 | Infra | Docker Compose (Node backend + Nginx + Redis) |
-| AI | Google Gemini 2.0 Flash → n8n webhook → keyword fallback |
+| AI | OpenRouter (Supports Gemini 2.0 Flash, GPT-4o, etc.) → n8n webhook → keyword fallback |
 | Weather | Open-Meteo API (free, no key needed) — real-time wind, waves, precipitation, visibility |
 
 ## Features
@@ -32,7 +32,7 @@ Real-time maritime command system. 15 ships. 1 Hz updates. AI distress NLP. Weat
 ```bash
 # 1. Copy and configure environment variables
 cp .env.example .env
-# Edit .env — at minimum set GEMINI_API_KEY and VITE_MAPBOX_TOKEN
+# Edit .env — at minimum set OPENROUTER_API_KEY and VITE_MAPBOX_TOKEN
 
 # 2. Build and start all services
 docker compose up -d --build
@@ -50,7 +50,7 @@ docker run -p 6379:6379 redis:7-alpine
 # Terminal 2 — Backend
 cd backend
 npm install
-GEMINI_API_KEY=your_key REDIS_URL=redis://localhost:6379 node server.js
+OPENROUTER_API_KEY=your_key REDIS_URL=redis://localhost:6379 node server.js
 
 # Terminal 3 — Frontend
 cd frontend
@@ -67,9 +67,8 @@ All variables are optional — the system degrades gracefully without them.
 
 | Variable | Default | Description |
 |---|---|---|
-| `GEMINI_API_KEY` | *(none)* | Enables AI distress NLP and Fleet Advisor via Gemini 2.0 Flash. Falls back to keyword extraction if omitted. |
-| `OPENAI_API_KEY` | *(none)* | Alternative AI provider. Used if `GEMINI_API_KEY` is absent and an OpenAI-compatible endpoint is configured. |
-| `OPENAI_BASE_URL` | `https://api.openai.com/v1/` | Base URL for the OpenAI-compatible API (e.g. a local Ollama proxy or Azure endpoint). |
+| `OPENROUTER_API_KEY` | *(none)* | Enables AI distress NLP and Fleet Advisor via OpenRouter. Falls back to keyword extraction if omitted. |
+| `OPENROUTER_MODEL` | `google/gemini-2.0-flash-exp:free` | The specific model string to invoke via OpenRouter. |
 | `REDIS_URL` | `redis://localhost:6379` | Redis connection string. Used for alert persistence, distress rate-limiting, and pub/sub fleet broadcast. System runs in degraded mode (no persistence) if Redis is unavailable. |
 | `FLEET_JSON` | `../fleet.json` | Absolute or relative path to the fleet configuration file (ships, ports, navigable polygon, bounding box). |
 | `PORT` | `8000` | HTTP/WebSocket port the backend listens on. |
@@ -145,7 +144,7 @@ Redis (optional)
 - **Geofencing**: Draw restricted zones on map → ships reroute automatically within 1 tick (1 s)
 - **Proximity alerts**: Any two ships within 2 km → alert fires with severity badge
 - **Weather**: Live Open-Meteo data → 30% fuel penalty inside storm zones, A\* penalises bad weather cells
-- **AI distress**: Free-form text → n8n webhook → Gemini → keyword fallback extracts severity, type, injuries
+- **AI distress**: Free-form text → n8n webhook → OpenRouter → keyword fallback extracts severity, type, injuries
 - **Fleet Advisor**: AI-generated fleet-wide action recommendations on demand
 - **Role-based**: Command = full fleet view + zone drawing + directives; Captain = own ship + directive response
 - **Playback**: 1 hour of 30 s snapshots, scrubbable timeline with auto-play and variable speed

@@ -233,9 +233,8 @@ async function subscribeFleetChannel() {
 // ── AI configuration (all from env — no hardcoded keys) ──────────────────────
 const OPENROUTER_KEY   = process.env.OPENROUTER_API_KEY || '';
 const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL   || 'google/gemini-2.0-flash-exp:free';
-const GEMINI_KEY       = process.env.GEMINI_API_KEY     || '';
 
-// Unified LLM caller: OpenRouter → Gemini direct → null
+// Unified LLM caller via OpenRouter
 async function callAI(systemPrompt, userContent, maxTokens = 400) {
   // Tier 1: OpenRouter (OpenAI-compatible, supports 200+ models)
   if (OPENROUTER_KEY) {
@@ -269,33 +268,7 @@ async function callAI(systemPrompt, userContent, maxTokens = 400) {
     }
   }
 
-  // Tier 2: Gemini native REST API
-  if (GEMINI_KEY) {
-    try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n${userContent}` }] }],
-            generationConfig: { maxOutputTokens: maxTokens },
-          }),
-          signal: AbortSignal.timeout(15000),
-        }
-      );
-      if (!res.ok) throw new Error(`Gemini HTTP ${res.status}: ${await res.text()}`);
-      const body = await res.json();
-      const text = body.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      if (!text) throw new Error('Empty response from Gemini');
-      console.log('[AI] Gemini direct OK');
-      return text;
-    } catch (e) {
-      console.warn(`[AI] Gemini direct failed: ${e.message}`);
-    }
-  }
-
-  return null; // both providers unavailable → caller uses keyword fallback
+  return null; // provider unavailable → caller uses keyword fallback
 }
 
 // ── Distress NLP helpers ──────────────────────────────────────────────────────
@@ -334,7 +307,7 @@ async function aiExtractLLM(message) {
     const m = text.match(/\{[\s\S]*\}/);
     if (m) {
       const parsed = JSON.parse(m[0]);
-      return { ...parsed, source: OPENROUTER_KEY ? 'openrouter' : 'gemini', issue: parsed.incident_type, impact_quantified: parsed.damage_estimate };
+      return { ...parsed, source: 'openrouter', issue: parsed.incident_type, impact_quantified: parsed.damage_estimate };
     }
   } catch (e) { console.warn('[AI] distress JSON parse failed:', e.message); }
   return null;

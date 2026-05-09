@@ -153,7 +153,7 @@ function CommandApp() {
         headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
       const data = await r.json();
       setAdvisorData(data);
-    } catch { setAdvisorData({ error: 'Advisor unavailable — check GEMINI_API_KEY' }); }
+    } catch { setAdvisorData({ error: 'Advisor unavailable — check OPENROUTER_API_KEY' }); }
     setAdvisorLoading(false);
   };
 
